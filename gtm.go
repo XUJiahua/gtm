@@ -87,6 +87,7 @@ type Options struct {
 	UpdateDataAsDelta   bool
 	ChangeStreamNs      []string
 	DirectReadNs        []string
+	DirectReadOffsets   map[string]interface{}
 	DirectReadFilter    OpFilter
 	DirectReadSplitMax  int32
 	DirectReadConcur    int
@@ -1455,6 +1456,14 @@ func DirectReadPaged(ctx *OpCtx, client *mongo.Client, ns string, o *Options) (e
 	segment := &CollectionSegment{
 		splitKey: "_id",
 	}
+	if o.DirectReadOffsets != nil {
+		if offset, ok := o.DirectReadOffsets[ns]; ok {
+			// inject _id min
+			segment.min = offset
+			fmt.Printf("inject min %v\n", segment)
+		}
+	}
+
 	var cinfo *CollectionInfo
 	var stats *CollectionStats = &CollectionStats{}
 	cinfo, _ = GetCollectionInfo(ctx, client, ns)

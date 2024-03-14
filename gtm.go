@@ -87,6 +87,7 @@ type Options struct {
 	UpdateDataAsDelta   bool
 	ChangeStreamNs      []string
 	DirectReadNs        []string
+	DirectReadResumable bool
 	DirectReadOffsets   map[string]interface{}
 	DirectReadFilter    OpFilter
 	DirectReadSplitMax  int32
@@ -1159,6 +1160,9 @@ func DirectReadSegment(ctx *OpCtx, client *mongo.Client, ns string, o *Options, 
 		}
 	} else {
 		opts := options.Find()
+		if o.DirectReadResumable {
+			opts.SetSort(bson.D{{seg.splitKey, 1}})
+		}
 		if o.DirectReadNoTimeout {
 			opts.SetNoCursorTimeout(true)
 		}

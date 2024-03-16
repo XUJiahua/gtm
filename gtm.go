@@ -1505,7 +1505,11 @@ func DirectReadPaged(ctx *OpCtx, client *mongo.Client, ns string, o *Options) (e
 	}
 	stats, _ = GetCollectionStats(ctx, client, ns)
 	c := client.Database(n.database).Collection(n.collection)
-	var maxSplits int32 = o.DirectReadSplitMax
+	var maxSplits = o.DirectReadSplitMax
+	// fix: direct read resumable depends on read in serial
+	if o.DirectReadResumable {
+		maxSplits = 0
+	}
 	if maxSplits <= 0 {
 		ctx.allWg.Add(1)
 		ctx.DirectReadWg.Add(1)

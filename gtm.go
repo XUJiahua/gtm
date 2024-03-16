@@ -3,6 +3,7 @@ package gtm
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"log"
 	"os"
 	"strconv"
@@ -331,6 +332,7 @@ type OpBuf struct {
 	BufferDuration time.Duration
 }
 
+// OpCtx created by Start, accept 1 MongoDB connection
 type OpCtx struct {
 	lock             *sync.Mutex
 	OpC              OpChan

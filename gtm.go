@@ -1185,26 +1185,26 @@ func DirectReadSegment(ctx *OpCtx, client *mongo.Client, ns string, o *Options, 
 	}
 	result := map[string]interface{}{}
 
-	lastTs := time.Time{}
+	//lastTs := time.Time{}
 	for cursor.Next(task.ctx) {
 		if err = cursor.Decode(&result); err != nil {
 			ctx.ErrC <- errors.Wrap(err, "Error decoding cursor in direct reads")
 			result = map[string]interface{}{}
 			continue
 		}
-		if id, ok := result["_id"].(primitive.ObjectID); ok {
-			ts := id.Timestamp()
-			logrus.Debugf("ts: %s", ts.String())
-			if ts.Before(lastTs) {
-				logrus.Debugf("ts/_id is not monotonic increasing")
-				if o.DirectReadResumable {
-					logrus.Fatalf("not work for DirectReadResumable mode")
-				}
-			}
-			lastTs = ts
-		} else {
-			logrus.Warnf("_id is not primitive.ObjectID type")
-		}
+		//if id, ok := result["_id"].(primitive.ObjectID); ok {
+		//	ts := id.Timestamp()
+		//	logrus.Debugf("ts: %s", ts.String())
+		//	if ts.Before(lastTs) {
+		//		logrus.Debugf("ts/_id is not monotonic increasing")
+		//		if o.DirectReadResumable {
+		//			logrus.Fatalf("not work for DirectReadResumable mode")
+		//		}
+		//	}
+		//	lastTs = ts
+		//} else {
+		//	logrus.Warnf("_id is not primitive.ObjectID type")
+		//}
 
 		t := time.Now().UTC().Unix()
 		op := &Op{

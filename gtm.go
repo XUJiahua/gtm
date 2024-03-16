@@ -347,6 +347,7 @@ type OpCtx struct {
 	log              *log.Logger
 }
 
+// OpCtxMulti created by StartMulti, accept more than 1 MongoDB connection (sharding)
 type OpCtxMulti struct {
 	lock         *sync.Mutex
 	contexts     []*OpCtx
@@ -1098,6 +1099,8 @@ func TailOps(ctx *OpCtx, client *mongo.Client, channels []OpChan, o *Options) er
 }
 
 func DirectReadSegment(ctx *OpCtx, client *mongo.Client, ns string, o *Options, seg *CollectionSegment, stats *CollectionStats) (err error) {
+	logrus.Debugf("direct read segment: %v", seg)
+
 	defer ctx.allWg.Done()
 	defer ctx.DirectReadWg.Done()
 	defer ctx.directReadConcWg.Done()
@@ -1162,6 +1165,7 @@ func DirectReadSegment(ctx *OpCtx, client *mongo.Client, ns string, o *Options, 
 		opts := options.Find()
 		if o.DirectReadResumable {
 			opts.SetSort(bson.D{{seg.splitKey, 1}})
+			logrus.Debugf("DirectReadResumable enabled, read order by %s\n", seg.splitKey)
 		}
 		if o.DirectReadNoTimeout {
 			opts.SetNoCursorTimeout(true)
@@ -1464,7 +1468,7 @@ func DirectReadPaged(ctx *OpCtx, client *mongo.Client, ns string, o *Options) (e
 		if offset, ok := o.DirectReadOffsets[ns]; ok {
 			// inject _id min
 			segment.min = offset
-			fmt.Printf("inject min %v\n", segment)
+			logrus.Debugf("inject min %v", segment)
 		}
 	}
 

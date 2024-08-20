@@ -1046,6 +1046,7 @@ func TailOps(ctx *OpCtx, client *mongo.Client, channels []OpChan, o *Options) er
 				ctx.ErrC <- errors.Wrap(err, "Error decoding the oplog document")
 				break
 			}
+			CurrentOpLogTime.Set(float64(entry.Timestamp.T))
 			op := &Op{
 				Id:        "",
 				Operation: "",
@@ -1056,9 +1057,6 @@ func TailOps(ctx *OpCtx, client *mongo.Client, channels []OpChan, o *Options) er
 			}
 			ok, err := op.ParseLogEntry(&entry, o)
 			if err == nil {
-				if ok {
-					CurrentOpLogTime.Set(float64(op.Timestamp.T))
-				}
 				if ok && op.matchesFilter(o) {
 					if opDataReady(op, o) {
 						ctx.OpC <- op
